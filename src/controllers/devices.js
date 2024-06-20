@@ -8,6 +8,20 @@ export const getDevice = (req, res) => {
     })
 }
 
+
+export const getStatusDevice = (req, res) => {
+    DeviceModel.aggregate([
+        {$group: {
+            _id: '$isOnline',
+            count: {$sum: 1}
+        }}
+    ])
+    .then(result => {
+        res.status(200).json(result)
+
+    })
+}
+
 export const insertDevice = (req, res) => {
     const imei = req.body.imei
     const gsm = req.body.gsm
