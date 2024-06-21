@@ -7,10 +7,7 @@ const DeviceSchema = new Schema({
     nopol: {type: String, default: null},
     merk: {type: String, default: null},
     isOnline: {type: Boolean, default: false},
-    current: {
-        ignition: {type: Number, default: 0},
-        movement: {type: Number, default: 0}
-    }
+    current: {type: Object, default: {ignition: 0, movement: 0}}
 }, {
     timestamps: true
 })
