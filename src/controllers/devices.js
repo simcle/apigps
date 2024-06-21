@@ -55,12 +55,7 @@ export const updateDevice = (req, res) => {
     })
 }
 export const updateCurrent = async (data) => {
-    const device = await DeviceModel.findOne({imei: data.imei})
-    console.log(device)
-    if(device) {
-        device.current = data
-        device.save()
-    }
+    await DeviceModel.updateOne({imei: data.imei}, {$set: {current: data}})
 }
 export const statusDevice = async (data) => {
     await DeviceModel.updateOne({imei: data.imei}, {$set: {isOnline: data.status}})
