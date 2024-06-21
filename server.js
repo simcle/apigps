@@ -30,21 +30,29 @@ AwsMqtt.on('message', (topic, message) => {
     if(topic.match(myTopicData)) {
         imei = myTopic[0]
         let data = JSON.parse(payload)
+        let reported = data.state.reported
         data = {
             imei: imei,
-            totalOdometer: data.state.reported[16],
-            gsmSignal: data.state.reported[21],
-            externalVoltage: data.state.reported[66],
-            batteryVoltage: data.state.reported[67],
-            batteryCurrent: data.state.reported[68],
-            gnssStatus: data.state.reported[69],
-            sleepMode: data.state.reported[200],
-            ignition: data.state.reported[239],
-            movement: data.state.reported[240],
-            ts: data.state.reported.ts,
-            latlng: data.state.reported.latlng,
-            ang: data.state.reported.ang,
-            sp: data.state.reported.sp
+            totalOdometer: reported[16],
+            gsmSignal: reported[21],
+            externalVoltage: reported[66],
+            batteryVoltage: reported[67],
+            batteryCurrent: reported[68],
+            gnssStatus: reported[69],
+            vehicleSpeed: reported[81],
+            engineRPM: reported[85],
+            totalMileage: reported[87],
+            doorStatus: reported[90],
+            engineWorktime: reported[103],
+            engineTemperature: reported[115],
+            oilLevel: reported[235],
+            sleepMode: reported[200],
+            ignition: reported[239],
+            movement: reported[240],
+            ts: reported.ts,
+            latlng: reported.latlng,
+            ang: reported.ang,
+            sp: reported.sp
         }
         io.emit('data', data)
         io.emit(imei, data)

@@ -7,6 +7,19 @@ const { Schema } = mongoose;
 // 67 => batteryVoltage
 // 68 => batteryCurrent
 // 69 => gnssStatus
+// 81 => vehicleSpeed
+// 82 => acceleratorPedalPosition	
+// 85 => engineRPM	
+// 87 => totalMileage (meter)
+// 90 => doorStatus
+// 100 => programNumber
+// 103 => engineWorktime (counted)
+// 105 => Total Mileage
+// 115 => engineTemperature
+// 123 => Control State Flags
+// 124 => Agricultural Machinery Flags
+// 132 => Security State Flags
+// 235 => oilLevel
 // 181 => gnssPdop
 // 182 => gnssHdop
 // 200 => sleepMode
@@ -27,6 +40,13 @@ const ReportedSchema = new Schema({
     batteryCurrent: {type: Number},
     gnssStatus: {type: Number},
     sleepMode: {type: Number},
+    vehicleSpeed: {type: Number},
+    engineRPM: {type: Number},
+    totalMileage: {type: Number},
+    doorStatus: {type: Number},
+    engineWorktime: {type: Number},
+    engineTemperature: {type: Number},
+    oilLevel: {type: Number},
     ignition: {type: Number},
     movement: {type: Number},
     ts: {type: Number},
