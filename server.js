@@ -88,7 +88,7 @@ app.use('/auth', authRouter);
 app.use('/devices', authenticateToken, deviceRouter);
 app.use('/reported', authenticateToken, reportedRouter);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 mongoose.set('strictQuery', false)
 mongoose.connect(process.env.DATA_BASE, {
     autoIndex: true
