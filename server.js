@@ -5,10 +5,12 @@ import {createServer} from 'http'
 import {Server} from 'socket.io'
 import {AwsMqtt} from './awsMqtt.js'
 import mongoose from 'mongoose'
+import compression from 'compression'
 
 const app = express()
 app.use(cors())
 app.use(express.json())
+app.use(compression())
 const httpServer = createServer(app)
 const io = new Server(httpServer, {
     cors: {
