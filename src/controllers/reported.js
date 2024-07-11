@@ -68,7 +68,7 @@ export const downloadReport = (req, res) => {
             engineWorktime: 1,
             engineTemperature: {$multiply: ['$engineTemperature', 0.1]},
             oilLevel: 1,
-            ignition: 1,
+            ignition: {$cond: [{$eq: ['$ignition', 1]}, 'On', 'Off']},
             latlng: 1,
         }}
     ])
@@ -89,13 +89,13 @@ export const downloadReport = (req, res) => {
             {key: 'totalMileage', width: '10'},
             {key: 'oilLevel', width: '10'},
             {key: 'latlng', width: '25'},
-            {key: 'externalVoltage', width: '10'},
+            {key: 'externalVoltage', width: '25'},
         ]
         worksheet.getRow(1).values = ['Imei', `: ${device.imei}`]
         worksheet.getRow(2).values = ['GSM', `: ${device.gsm}`]
         worksheet.getRow(3).values = ['NoPol', `: ${device.nopol}`]
         worksheet.getRow(4).values = ['Buatan', `: ${device.merk}`]
-        worksheet.getRow(7).values = ['Tanggal', 'Mesin', 'RPM', 'Kecepatan', 'Suhu mesin', 'Odometer', 'Oli level', 'LatLng', 'Aki kendaraan (volt)']
+        worksheet.getRow(7).values = ['Tanggal', 'Mesin', 'RPM', 'Kecepatan', 'Suhu mesin', 'Odometer', 'Oli level', 'Koordinat (LatLng)', 'Aki kendaraan (volt)']
         worksheet.addRows(result[1])
         res.setHeader(
             "Content-Type",
@@ -109,4 +109,36 @@ export const downloadReport = (req, res) => {
         res.status(200).end();
     })
 
+}
+
+export const getStatistic = (req, res) => {
+    const imei = req.query.imei
+    const test = new Date(req.query.end)
+    const start = new Date(req.query.start).getTime()
+    const end = new Date(req.query.end).getTime()
+    ReportedModel.aggregate([
+        {$match: {$and: [{imei: imei}, {ts: {$gte: start, $lt: end}}]}},
+        {$sort: {ts: 1}},
+        {$project: {
+            ts: {$dateToString: {format: "%d/%m/%Y", date: {$toDate: '$ts'}, timezone: 'Asia/Jakarta'}},
+            totalMileage: {$divide: ['$totalMileage', 1000]},
+            vehicleSpeed: 1,
+        }},
+        {$group: {
+            _id: '$ts',
+            start: {$first: '$totalMileage'},
+            end: {$last: '$totalMileage'},
+            averageSpeed: {$avg: '$vehicleSpeed'}
+        }},
+        {$project: {
+            start: 1,
+            end: 1,
+            mileage: {$subtract: ['$end', '$start']},
+            averageSpeed: 1
+        }},
+        {$sort: {_id: 1}}
+    ])  
+    .then(result => {
+        res.status(200).json(result)
+    }) 
 }
