@@ -67,7 +67,7 @@ export const downloadReport = (req, res) => {
             doorStatus: 1,
             engineWorktime: 1,
             engineTemperature: {$multiply: ['$engineTemperature', 0.1]},
-            oilLevel: {$sond: [{$eq: ['oilLevel', 1]}, 'PERIKAS', 'OK']},
+            oilLevel: {$sond: [{$eq: ['$oilLevel', 1]}, 'PERIKAS', 'OK']},
             ignition: {$cond: [{$eq: ['$ignition', 1]}, 'On', 'Off']},
             latlng: 1,
         }}
