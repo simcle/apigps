@@ -124,13 +124,13 @@ export const getStatistic = (req, res) => {
             totalMileage: {$divide: ['$totalMileage', 1000]},
             vehicleSpeed: 1,
         }},
-        {$sort: {ts: 1}},
         {$group: {
             _id: '$ts',
             start: {$first: '$totalMileage'},
             end: {$last: '$totalMileage'},
             averageSpeed: {$avg: '$vehicleSpeed'}
         }},
+        {$sort: {ts: 1}},
         {$project: {
             start: 1,
             end: 1,
