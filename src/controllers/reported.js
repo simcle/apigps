@@ -117,13 +117,14 @@ export const getStatistic = (req, res) => {
     const start = new Date(req.query.start).getTime()
     const end = new Date(req.query.end).getTime()
     ReportedModel.aggregate([
-        {$match: {$and: [{imei: imei}, {ts: {$gte: start, $lt: end}}]}},
+        {$match: {$and: [{imei: imei} , {totalMileage: {$gte: 0}}, {ts: {$gte: start, $lt: end}}]}},
         {$sort: {ts: 1}},
         {$project: {
             ts: {$dateToString: {format: "%d/%m/%Y", date: {$toDate: '$ts'}, timezone: 'Asia/Jakarta'}},
             totalMileage: {$divide: ['$totalMileage', 1000]},
             vehicleSpeed: 1,
         }},
+        {$sort: {ts: 1}},
         {$group: {
             _id: '$ts',
             start: {$first: '$totalMileage'},
