@@ -1,5 +1,5 @@
 import DeviceModel from "../models/devices.js";
-
+import { AwsMqtt } from "../../awsMqtt.js";
 
 export const getDevice = (req, res) => {
     DeviceModel.find()
@@ -59,4 +59,22 @@ export const updateCurrent = async (data) => {
 }
 export const statusDevice = async (data) => {
     await DeviceModel.updateOne({imei: data.imei}, {$set: {isOnline: data.status}})
+}
+
+export const getPicture = async (req, res) => {
+    const imei = req.params.imei
+    const topic = `${imei}/commands`
+    AwsMqtt.publish(topic, JSON.stringify({"CMD": "camreq:1,1"}))
+    AwsMqtt.on('message', (topic , message) => {
+        if(topic === `${imei}/data`) {
+            const payload = message.toString()
+            let data = JSON.parse(payload)
+            if(data.RSP) {
+                console.log(data)
+            }
+        }
+    }) 
+    setTimeout(() => {
+        res.status(200).json('OK')
+    }, 1000)
 }

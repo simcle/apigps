@@ -22,6 +22,15 @@ const io = new Server(httpServer, {
 import { insertReported } from './src/controllers/reported.js'
 import { statusDevice, updateCurrent } from './src/controllers/devices.js'
 
+io.on('connection', (socket) => {
+    socket.on('progress', (msg) => {
+        io.emit('progress', msg)
+    })
+    socket.on('done', (msg) => {
+        io.emit('done', msg)
+    })
+})
+
 const myTopicData = /data/ig;
 const myTopicConnected = /connected/ig;
 const myTopicDisconnected = /disconnected/ig;
@@ -32,34 +41,36 @@ AwsMqtt.on('message', (topic, message) => {
     if(topic.match(myTopicData)) {
         imei = myTopic[0]
         let data = JSON.parse(payload)
-        let reported = data.state.reported
-        data = {
-            imei: imei,
-            totalOdometer: reported[16],
-            gsmSignal: reported[21],
-            externalVoltage: reported[66],
-            batteryVoltage: reported[67],
-            batteryCurrent: reported[68],
-            gnssStatus: reported[69],
-            vehicleSpeed: reported[81],
-            engineRPM: reported[85],
-            totalMileage: reported[87],
-            doorStatus: reported[90],
-            engineWorktime: reported[103],
-            engineTemperature: reported[115],
-            oilLevel: reported[235],
-            sleepMode: reported[200],
-            ignition: reported[239],
-            movement: reported[240],
-            ts: reported.ts,
-            latlng: reported.latlng,
-            ang: reported.ang,
-            sp: reported.sp
+        if(data.state) {
+            let reported = data.state.reported
+            data = {
+                imei: imei,
+                totalOdometer: reported[16],
+                gsmSignal: reported[21],
+                externalVoltage: reported[66],
+                batteryVoltage: reported[67],
+                batteryCurrent: reported[68],
+                gnssStatus: reported[69],
+                vehicleSpeed: reported[81],
+                engineRPM: reported[85],
+                totalMileage: reported[87],
+                doorStatus: reported[90],
+                engineWorktime: reported[103],
+                engineTemperature: reported[115],
+                oilLevel: reported[235],
+                sleepMode: reported[200],
+                ignition: reported[239],
+                movement: reported[240],
+                ts: reported.ts,
+                latlng: reported.latlng,
+                ang: reported.ang,
+                sp: reported.sp
+            }
+            io.emit('data', data)
+            io.emit(imei, data)
+            insertReported(data)
+            updateCurrent(data)
         }
-        io.emit('data', data)
-        io.emit(imei, data)
-        insertReported(data)
-        updateCurrent(data)
     }
     if(topic.match(myTopicConnected)) {
         imei = myTopic[4]
