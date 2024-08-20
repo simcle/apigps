@@ -27,11 +27,13 @@ export const insertDevice = (req, res) => {
     const gsm = req.body.gsm
     const nopol = req.body.nopol
     const merk = req.body.merk
+    const isDualcam = req.body.dualcam
     const device = new DeviceModel({
         imei: imei,
         gsm: gsm,
         nopol: nopol,
-        merk: merk
+        merk: merk,
+        isDualcam: isDualcam
     })
     device.save()
     .then(() => {
@@ -48,7 +50,8 @@ export const updateDevice = (req, res) => {
         imei: req.body.imei,
         gsm: req.body.gsm,
         nopol: req.body.nopol,
-        merk: req.body.merk
+        merk: req.body.merk,
+        isDualcam: req.body.dualcam
     })
     .then(() => {
         res.status(200).json('OK')
@@ -61,20 +64,26 @@ export const statusDevice = async (data) => {
     await DeviceModel.updateOne({imei: data.imei}, {$set: {isOnline: data.status}})
 }
 
+function waitMessage (topic) {
+        return new Promise((resolve) => {
+            AwsMqtt.on('message', (receivedTopic, message) => {
+                if(receivedTopic == topic) {
+                    const payload = message.toString()
+                    const data = JSON.parse(payload)
+                    if(data.RSP) {
+                        resolve(data)
+                    }
+                }
+            })
+        })
+}
+
 export const getPicture = async (req, res) => {
+    const command = req.body.command
     const imei = req.params.imei
     const topic = `${imei}/commands`
-    AwsMqtt.publish(topic, JSON.stringify({"CMD": "camreq:1,1"}))
-    AwsMqtt.on('message', (topic , message) => {
-        if(topic === `${imei}/data`) {
-            const payload = message.toString()
-            let data = JSON.parse(payload)
-            if(data.RSP) {
-                console.log(data)
-            }
-        }
-    }) 
-    setTimeout(() => {
-        res.status(200).json('OK')
-    }, 1000)
+    
+    AwsMqtt.publish(topic, JSON.stringify({"CMD": command}))
+    const m = await waitMessage(`${imei}/data`)
+    res.status(200).json('OK')
 }
